@@ -318,6 +318,16 @@ func (c *cmdRemoteAdd) run(cmd *cobra.Command, args []string) error {
 		conf.Remotes = map[string]config.Remote{}
 	}
 
+	if c.flagToken != "" {
+		rawToken, err := shared.CertificateTokenDecode(c.flagToken)
+		if err != nil {
+			// Return the error here rather than skipping as we did in the previous case, as the token has been explicitly provided.
+			return fmt.Errorf("Failed to parse token: %w", err)
+		}
+
+		return c.runToken(server, c.flagToken, rawToken)
+	}
+
 	rawToken, err := shared.CertificateTokenDecode(addr)
 	if err == nil {
 		return c.runToken(server, addr, rawToken)
